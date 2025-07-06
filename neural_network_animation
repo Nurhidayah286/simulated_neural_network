@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Networks: A Mysterious Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #fdf6e3; /* Cheerful pastel yellow */
+            color: #333; /* Darker text for readability */
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .panel {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .biological-panel {
+            background: radial-gradient(circle at center, #a8d8ea 0%, #d4eaf7 100%); /* Pastel blue */
+            border-right: 2px solid #ccc;
+        }
+
+        .artificial-panel {
+            background: radial-gradient(circle at center, #f8c9d4 0%, #fde2e7 100%); /* Pastel pink */
+        }
+
+        .panel-title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 100;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+        }
+
+        .biological-panel .panel-title {
+            color: #1e6091; /* Darker blue */
+        }
+
+        .artificial-panel .panel-title {
+            color: #c94b4b; /* Darker pink/red */
+        }
+
+        .network-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Biological Network Styles */
+        .bio-node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #56a3a6 0%, #306998 100%);
+            box-shadow: 0 0 15px #306998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.5s ease;
+        }
+
+        .bio-node.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .bio-node.firing {
+            animation: bioFiring 0.5s ease;
+        }
+
+        @keyframes bioFiring {
+            0% { box-shadow: 0 0 15px #306998; }
+            50% { box-shadow: 0 0 30px #FFF, 0 0 50px #56a3a6; }
+            100% { box-shadow: 0 0 15px #306998; }
+        }
+
+        .bio-connection {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, #56a3a6, #306998);
+            opacity: 0;
+            transform-origin: left;
+            transform: scaleX(0);
+            transition: all 0.8s ease;
+        }
+
+        .bio-connection.active {
+            opacity: 1;
+            transform: scaleX(1);
+        }
+        
+        /* Artificial Network Styles */
+        .ai-layer {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .input-layer { left: 10%; }
+        .hidden-layer { left: 50%; transform: translateX(-50%); }
+        .output-layer { right: 10%; }
+
+        .ai-node {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff8c69 0%, #c94b4b 100%);
+            box-shadow: 0 0 15px #c94b4b;
+            margin: 15px 0;
+            opacity: 0.3;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+        }
+
+        .ai-node.active {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 0 25px #c94b4b, 0 0 35px #ffda79;
+        }
+
+        .ai-connection {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, #c94b4b, #ffda79);
+            opacity: 0;
+            transform-origin: left;
+            transform: scaleX(0);
+            transition: all 0.5s ease;
+        }
+
+        .ai-connection.active {
+            opacity: 0.7;
+            transform: scaleX(1);
+        }
+
+        .control-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #306998, #c94b4b);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .voice-toggle {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .voice-toggle.muted {
+            background: linear-gradient(45deg, #888, #555);
+        }
+
+        .explanation-box {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.85);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            max-width: 600px;
+            text-align: center;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .explanation-box h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .explanation-box p {
+            color: #555;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .voice-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            opacity: 0;
+            animation: pulse 1s infinite;
+        }
+
+        .voice-indicator.speaking {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        @keyframes mysterPulse {
+            0% { transform: scale(1); opacity: 1; }
+            25% { transform: scale(1.1); opacity: 0.8; }
+            50% { transform: scale(0.9); opacity: 0.6; }
+            75% { transform: scale(1.05); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .timer-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            width: 0%;
+            transition: width 0.1s linear;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer-bar" id="timerBar"></div>
+    
+    <div class="container">
+        <div class="panel biological-panel">
+            <div class="panel-title">Biological Network</div>
+            <div class="network-container" id="biologicalNetwork"></div>
+        </div>
+
+        <div class="panel artificial-panel">
+            <div class="panel-title">Artificial Network</div>
+            <div class="network-container" id="artificialNetwork">
+                <div class="ai-layer input-layer">
+                    <div class="ai-node" data-layer="input"></div> <div class="ai-node" data-layer="input"></div>
+                    <div class="ai-node" data-layer="input"></div> <div class="ai-node" data-layer="input"></div>
+                </div>
+                <div class="ai-layer hidden-layer">
+                    <div class="ai-node" data-layer="hidden"></div> <div class="ai-node" data-layer="hidden"></div>
+                    <div class="ai-node" data-layer="hidden"></div> <div class="ai-node" data-layer="hidden"></div>
+                    <div class="ai-node" data-layer="hidden"></div> <div class="ai-node" data-layer="hidden"></div>
+                </div>
+                <div class="ai-layer output-layer">
+                    <div class="ai-node" data-layer="output"></div> <div class="ai-node" data-layer="output"></div>
+                    <div class="ai-node" data-layer="output"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="explanation-box">
+        <h3>The Mystery of Neural Networks</h3>
+        <p id="current-explanation">Press 'Start Animation' to see how brains and AI work...</p>
+        <div class="voice-indicator" id="voiceIndicator"></div>
+    </div>
+
+    <div class="control-panel">
+        <button class="restart-btn" onclick="restartAnimations()">Start Animation</button>
+        <button class="voice-toggle" id="voiceToggle" onclick="toggleVoice()">🔊 Voice ON</button>
+    </div>
+
+    <script>
+        let animationRunning = false;
+        let voiceEnabled = true;
+        let currentUtterance = null;
+        let currentStepIndex = 0;
+        let totalDuration = 40000; // Approx. 40 seconds for the full sequence
+        let startTime = 0;
+
+        function speak(text, callback) {
+            document.getElementById('current-explanation').textContent = text;
+            if (!voiceEnabled) {
+                if (callback) callback();
+                return;
+            }
+            
+            speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.1;
+            utterance.pitch = 1.1;
+            utterance.volume = 0.9;
+            utterance.lang = 'en-US'; // English language
+            
+            const indicator = document.getElementById('voiceIndicator');
+            indicator.classList.add('speaking');
+            
+            utterance.onend = () => {
+                indicator.classList.remove('speaking');
+                currentUtterance = null;
+                if (callback) callback();
+            };
+            
+            utterance.onerror = () => {
+                indicator.classList.remove('speaking');
+                currentUtterance = null;
+                if (callback) callback();
+            };
+            
+            currentUtterance = utterance;
+            speechSynthesis.speak(utterance);
+        }
+
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            const button = document.getElementById('voiceToggle');
+            
+            if (voiceEnabled) {
+                button.textContent = '🔊 Voice ON';
+                button.classList.remove('muted');
+            } else {
+                button.textContent = '🔇 Voice OFF';
+                button.classList.add('muted');
+                speechSynthesis.cancel();
+                document.getElementById('voiceIndicator').classList.remove('speaking');
+            }
+        }
+
+        function updateTimer() {
+            if (!animationRunning) return;
+            
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min((elapsed / totalDuration) * 100, 100);
+            document.getElementById('timerBar').style.width = progress + '%';
+            
+            if (progress < 100) {
+                requestAnimationFrame(updateTimer);
+            }
+        }
+
+        function createBiologicalNetwork() {
+            const container = document.getElementById('biologicalNetwork');
+            container.innerHTML = '';
+            const nodes = [
+                { id: 'A', x: 15, y: 50, label: 'A' }, { id: 'B', x: 35, y: 50, label: 'B' },
+                { id: 'C', x: 55, y: 35, label: 'C' }, { id: 'D', x: 55, y: 65, label: 'D' },
+                { id: 'E', x: 75, y: 25, label: 'E' }, { id: 'F', x: 75, y: 50, label: 'F' },
+                { id: 'G', x: 75, y: 75, label: 'G' }
+            ];
+
+            nodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'bio-node';
+                nodeEl.id = node.id;
+                nodeEl.style.left = node.x + '%';
+                nodeEl.style.top = node.y + '%';
+                nodeEl.textContent = node.label;
+                container.appendChild(nodeEl);
+            });
+
+            const connections = [
+                { from: 'A', to: 'B' }, { from: 'B', to: 'C' }, { from: 'B', to: 'D' },
+                { from: 'C', to: 'E' }, { from: 'C', to: 'F' }, { from: 'D', to: 'F' }, { from: 'D', to: 'G' }
+            ];
+
+            connections.forEach(conn => {
+                const fromNode = document.getElementById(conn.from);
+                const toNode = document.getElementById(conn.to);
+                const fromRect = fromNode.getBoundingClientRect();
+                const toRect = toNode.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+
+                const connEl = document.createElement('div');
+                connEl.className = 'bio-connection';
+                
+                const fromX = fromRect.left - containerRect.left + fromRect.width / 2;
+                const fromY = fromRect.top - containerRect.top + fromRect.height / 2;
+                const toX = toRect.left - containerRect.left + toRect.width / 2;
+                const toY = toRect.top - containerRect.top + toRect.height / 2;
+
+                const length = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
+                const angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+
+                connEl.style.left = fromX + 'px';
+                connEl.style.top = fromY + 'px';
+                connEl.style.width = length + 'px';
+                connEl.style.transform = `rotate(${angle}deg)`;
+                connEl.id = `conn-${conn.from}-${conn.to}`;
+                container.appendChild(connEl);
+            });
+        }
+
+        function runAnimationSequence() {
+            const sequence = [
+                {
+                    narration: "Hey, want to know the big mystery in neural networks? Watch this!",
+                    action: () => {}
+                },
+                {
+                    narration: "On the left - a real brain. Neuron A gets a signal... but will it fire? It's not guaranteed!",
+                    action: () => {
+                        if (Math.random() > 0.2) {
+                            const nodeA = document.getElementById('A');
+                            nodeA.classList.add('active', 'firing');
+                            setTimeout(() => nodeA.classList.remove('firing'), 500);
+                        }
+                    }
+                },
+                {
+                    narration: "On the right - an artificial AI. Input goes in, but the calculation inside is a total mystery!",
+                    action: () => {
+                        document.querySelectorAll('[data-layer="input"]').forEach((node, index) => {
+                            setTimeout(() => node.classList.add('active'), index * 100);
+                        });
+                    }
+                },
+                {
+                    narration: "Our brain - the signal spreads to neuron B. But it's a competition! We don't know which path will win!",
+                    action: () => {
+                        if (document.getElementById('A').classList.contains('active')) {
+                            document.getElementById('conn-A-B').classList.add('active');
+                            const nodeB = document.getElementById('B');
+                            nodeB.classList.add('active');
+                            if (Math.random() > 0.4) {
+                                nodeB.classList.add('firing');
+                                setTimeout(() => nodeB.classList.remove('firing'), 500);
+                            }
+                        }
+                    }
+                },
+                {
+                    narration: "The AI - its hidden layers perform millions of calculations. Even its creators don't fully understand why!",
+                    action: () => {
+                        document.querySelectorAll('[data-layer="hidden"]').forEach((node, index) => {
+                            setTimeout(() => {
+                                if (Math.random() > 0.3) node.classList.add('active');
+                            }, index * 80);
+                        });
+                    }
+                },
+                {
+                    narration: "The final output - both systems make a decision. But how they decide? It's a mystery!",
+                    action: () => {
+                         // Biological output
+                        ['conn-B-C', 'conn-B-D'].forEach(connId => document.getElementById(connId).classList.add('active'));
+                        ['C', 'D'].forEach(nodeId => document.getElementById(nodeId).classList.add('active', 'firing'));
+                        setTimeout(() => ['C', 'D'].forEach(nodeId => document.getElementById(nodeId).classList.remove('firing')), 500);
+
+                        // Artificial output
+                        document.querySelectorAll('[data-layer="output"]').forEach((node, index) => {
+                            setTimeout(() => {
+                                if (Math.random() > 0.5) node.classList.add('active');
+                            }, index * 200);
+                        });
+                    }
+                },
+                {
+                    narration: "This is the mystery of intelligence - patterns from chaos. We can observe it, but we can't fully understand it!",
+                    action: () => {
+                        document.querySelectorAll('.bio-node.active').forEach(node => node.style.animation = 'mysterPulse 0.8s ease');
+                        document.querySelectorAll('.ai-node.active').forEach(node => node.style.animation = 'mysterPulse 0.8s ease');
+                    }
+                }
+            ];
+
+            currentStepIndex = 0;
+            startTime = Date.now();
+            updateTimer();
+
+            function executeNextStep() {
+                if (currentStepIndex >= sequence.length) {
+                    animationRunning = false;
+                    speak("And that's the beautiful mystery of neural networks. Thanks for watching!");
+                    return;
+                }
+
+                const step = sequence[currentStepIndex];
+                step.action();
+                
+                speak(step.narration, () => {
+                    currentStepIndex++;
+                    // A short delay before the next narration starts to allow animation to be seen
+                    setTimeout(executeNextStep, 500);
+                });
+            }
+
+            executeNextStep();
+        }
+
+        function restartAnimations() {
+            if (animationRunning) return;
+            speechSynthesis.cancel();
+            document.getElementById('voiceIndicator').classList.remove('speaking');
+            
+            // Reset all nodes, connections, and animations
+            document.querySelectorAll('.bio-node, .ai-node').forEach(node => {
+                node.classList.remove('active', 'firing');
+                node.style.animation = '';
+            });
+            document.querySelectorAll('.bio-connection').forEach(conn => conn.classList.remove('active'));
+            
+            document.getElementById('timerBar').style.transition = 'none';
+            document.getElementById('timerBar').style.width = '0%';
+            // Re-enable transition after reset
+            setTimeout(() => document.getElementById('timerBar').style.transition = 'width 0.1s linear', 50);
+
+            animationRunning = true;
+            runAnimationSequence();
+        }
+
+        window.onload = function() {
+            createBiologicalNetwork();
+            speak("The neural networks are ready! Press 'Start Animation' to explore the mystery of brains and AI!");
+        };
+    </script>
+</body>
+</html>
